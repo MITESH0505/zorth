@@ -29,6 +29,13 @@ app.use("/api/bookmarks", bookmarkRoutes);
 app.use("/api/auth", authRoutes);
 app.use("/api/admin", adminRoutes);
 
+
+
+ 
+
+ app.get("/" , (_req , res) => {
+  res.send("Zorth backend running");
+ });
 app.get("/api/health", (_req, res) => {
   res.json({
     status: "ok",
