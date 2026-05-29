@@ -1,7 +1,7 @@
 import Link from "next/link";
 
 async function getResources() {
-  const res = await fetch("http://localhost:4000/api/resources", {
+  const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/resources`, {
     cache: "no-store",
   });
 
