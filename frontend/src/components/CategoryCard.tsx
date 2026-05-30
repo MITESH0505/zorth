@@ -108,7 +108,7 @@ export default function CategoryCard({ category, count, index, isActive }: Categ
           </div>
 
           {/* Count chip — top-right */}
-          <div className="absolute top-2.5 right-2.5">
+          {/* <div className="absolute top-2.5 right-2.5">
             <span
               className="text-[9px] tabular-nums font-semibold px-1.5 py-0.5 rounded-full backdrop-blur-md"
               style={{
@@ -119,7 +119,7 @@ export default function CategoryCard({ category, count, index, isActive }: Categ
             >
               {count}
             </span>
-          </div>
+          </div> */}
 
           {/* Fade from gradient into card body */}
           <div
