@@ -8,7 +8,7 @@ import SearchModal from "@/components/SearchModal";
 import CategoryGrid from "@/components/CategoryGrid";
 import TrendingSection from "@/components/TrendingSection";
 import AboutSection from "@/components/AboutSection";
-import CommunitySection from "@/components/CommunitySection";
+// import CommunitySection from "@/components/CommunitySection";
 import Footer from "@/components/Footer";
 
 const sectionIds = ["home", "categories", "trending", "about", "contribute"];
@@ -103,7 +103,7 @@ export default function Home() {
 
           <TrendingSection />
           <AboutSection />
-          <CommunitySection />
+          {/* <CommunitySection /> */}
           <Footer />
         </main>
       </div>
