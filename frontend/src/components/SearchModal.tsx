@@ -6,6 +6,12 @@ import { Search, X, ExternalLink, TrendingUp } from "lucide-react";
 import { categories } from "@/data/categories";
 import { trendingResources } from "@/data/resources";
 
+declare global {
+  interface Window {
+    __scrollToCategory?: (slug: string) => void;
+  }
+}
+
 interface SearchModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -58,6 +64,22 @@ export default function SearchModal({ isOpen, onClose }: SearchModalProps) {
     return matchesQuery && matchesCategory;
   });
 
+  const handleScrollToCategory = useCallback(
+    (categoryName: string) => {
+      // Find the matching category slug from the category name
+      const slug = categoryName.toLowerCase().replace(/[^a-z0-9]+/g, "-");
+      if (window.__scrollToCategory) {
+        window.__scrollToCategory(slug);
+      } else {
+        // Fallback: plain scroll if CategoryGrid hasn't registered yet
+        const el = document.getElementById(slug);
+        if (el) el.scrollIntoView({ behavior: "smooth", block: "center" });
+      }
+      onClose();
+    },
+    [onClose]
+  );
+
   const handleKeyDown = useCallback(
     (e: KeyboardEvent) => {
       if (!isOpen) return;
@@ -67,15 +89,14 @@ export default function SearchModal({ isOpen, onClose }: SearchModalProps) {
       if (e.key === "Enter" && filtered[activeIndex]) {
         const item = filtered[activeIndex];
         if (item.type === "category") {
-          const el = document.getElementById(item.title.toLowerCase().replace(/[^a-z0-9]+/g, "-"));
-          if (el) el.scrollIntoView({ behavior: "smooth" });
+          handleScrollToCategory(item.title);
         } else {
           window.open(item.url, "_blank", "noopener");
+          onClose();
         }
-        onClose();
       }
     },
-    [isOpen, filtered, activeIndex, onClose]
+    [isOpen, filtered, activeIndex, onClose, handleScrollToCategory]
   );
 
   useEffect(() => {
@@ -179,7 +200,14 @@ export default function SearchModal({ isOpen, onClose }: SearchModalProps) {
               {categories.map((cat) => (
                 <button
                   key={cat.id}
-                  onClick={() => setSelectedCategory(selectedCategory === cat.name ? "" : cat.name)}
+                  onClick={() => {
+                    if (selectedCategory === cat.name) {
+                      setSelectedCategory("");
+                    } else {
+                      setSelectedCategory(cat.name);
+                      handleScrollToCategory(cat.name);
+                    }
+                  }}
                   className={`shrink-0 px-3 py-1 rounded-full text-xs font-medium whitespace-nowrap transition-all duration-200 ${
                     selectedCategory === cat.name
                       ? "bg-white/[0.07] text-white/90 border border-white/10"
@@ -206,7 +234,7 @@ export default function SearchModal({ isOpen, onClose }: SearchModalProps) {
                     {categories.slice(0, 5).map((cat) => (
                       <button
                         key={cat.id}
-                        onClick={() => setSelectedCategory(cat.name)}
+                        onClick={() => handleScrollToCategory(cat.name)}
                         className="px-3 py-1.5 rounded-full text-xs font-medium
                                    text-white/50 hover:text-white
                                    bg-white/[0.03] hover:bg-white/[0.07]
@@ -235,12 +263,11 @@ export default function SearchModal({ isOpen, onClose }: SearchModalProps) {
                     key={item.id}
                     onClick={() => {
                       if (item.type === "category") {
-                        const el = document.getElementById(item.title.toLowerCase().replace(/[^a-z0-9]+/g, "-"));
-                        if (el) el.scrollIntoView({ behavior: "smooth" });
+                        handleScrollToCategory(item.title);
                       } else {
                         window.open(item.url, "_blank", "noopener");
+                        onClose();
                       }
-                      onClose();
                     }}
                     className={`w-full flex items-center gap-3 sm:gap-4 px-4 sm:px-5 py-3 sm:py-3.5 text-left transition-all duration-200 ${
                       index === activeIndex

@@ -21,9 +21,29 @@ interface CategoryCardProps {
   count: number;
   index: number;
   isActive?: boolean;
+  isHighlighted?: boolean;
 }
 
-export default function CategoryCard({ category, count, index, isActive }: CategoryCardProps) {
+// Inject highlight keyframes once into the document head
+const HIGHLIGHT_STYLE_ID = "category-card-highlight-style";
+if (typeof document !== "undefined" && !document.getElementById(HIGHLIGHT_STYLE_ID)) {
+  const style = document.createElement("style");
+  style.id = HIGHLIGHT_STYLE_ID;
+  style.textContent = `
+    @keyframes categoryCardHighlight {
+      0%   { box-shadow: 0 2px 8px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.08); border-color: var(--color-border); }
+      12%  { box-shadow: 0 0 0 2px rgba(99,102,241,0.55), 0 8px 32px rgba(99,102,241,0.22), 0 2px 8px rgba(0,0,0,0.14); border-color: rgba(99,102,241,0.6); }
+      85%  { box-shadow: 0 0 0 2px rgba(99,102,241,0.45), 0 8px 32px rgba(99,102,241,0.18), 0 2px 8px rgba(0,0,0,0.14); border-color: rgba(99,102,241,0.5); }
+      100% { box-shadow: 0 2px 8px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.08); border-color: var(--color-border); }
+    }
+    .category-card-highlighted {
+      animation: categoryCardHighlight 2.6s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+    }
+  `;
+  document.head.appendChild(style);
+}
+
+export default function CategoryCard({ category, count, index, isActive, isHighlighted }: CategoryCardProps) {
   const Icon = iconMap[category.icon] || Grid3X3;
 
   return (
@@ -42,12 +62,15 @@ export default function CategoryCard({ category, count, index, isActive }: Categ
           group relative w-full h-full overflow-hidden rounded-2xl cursor-pointer
           flex flex-col
           ${isActive ? "ring-2 ring-indigo-500/40" : ""}
+          ${isHighlighted ? "category-card-highlighted" : ""}
         `}
         style={{
           backgroundColor: "var(--color-card-bg)",
           border: "1px solid var(--color-border)",
           boxShadow: "0 2px 8px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.08)",
-          transition: "box-shadow 0.28s ease, border-color 0.28s ease, transform 0.28s cubic-bezier(0.22,1,0.36,1)",
+          transition: isHighlighted
+            ? "none"
+            : "box-shadow 0.28s ease, border-color 0.28s ease, transform 0.28s cubic-bezier(0.22,1,0.36,1)",
           willChange: "transform",
         }}
         whileHover={{
@@ -55,11 +78,13 @@ export default function CategoryCard({ category, count, index, isActive }: Categ
           transition: { duration: 0.26, ease: [0.22, 1, 0.36, 1] },
         }}
         onMouseEnter={(e) => {
+          if (isHighlighted) return;
           (e.currentTarget as HTMLElement).style.boxShadow =
             "0 8px 28px rgba(0,0,0,0.18), 0 0 0 1px var(--color-accent-border), 0 20px 48px rgba(99,102,241,0.12)";
           (e.currentTarget as HTMLElement).style.borderColor = "var(--color-accent-border)";
         }}
         onMouseLeave={(e) => {
+          if (isHighlighted) return;
           (e.currentTarget as HTMLElement).style.boxShadow =
             "0 2px 8px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.08)";
           (e.currentTarget as HTMLElement).style.borderColor = "var(--color-border)";
