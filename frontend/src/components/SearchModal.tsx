@@ -2,7 +2,8 @@
 
 import { useState, useEffect, useRef, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Search, X, ExternalLink, TrendingUp } from "lucide-react";
+import { Search, X, ExternalLink, TrendingUp, ArrowUpRight } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { categories } from "@/data/categories";
 import { trendingResources } from "@/data/resources";
 
@@ -35,6 +36,7 @@ export default function SearchModal({ isOpen, onClose }: SearchModalProps) {
   const [activeIndex, setActiveIndex] = useState(0);
   const inputRef = useRef<HTMLInputElement>(null);
   const resultsRef = useRef<HTMLDivElement>(null);
+  const router = useRouter();
 
   const allItems = [
     ...categories.map((c) => ({
@@ -43,6 +45,7 @@ export default function SearchModal({ isOpen, onClose }: SearchModalProps) {
       description: c.description,
       category: c.name,
       type: "category" as const,
+      slug: c.slug,
     })),
     ...trendingResources.map((r) => ({
       id: r.id,
@@ -51,10 +54,13 @@ export default function SearchModal({ isOpen, onClose }: SearchModalProps) {
       category: r.category,
       type: "resource" as const,
       url: r.url,
+      // Derive the category slug for internal navigation
+      categorySlug: r.category.toLowerCase().replace(/[^a-z0-9]+/g, "-"),
     })),
   ];
 
-  const filtered = allItems.filter((item) => {
+  // Filter items matching query and selectedCategory
+  const rawFiltered = allItems.filter((item) => {
     const matchesQuery =
       !query ||
       item.title.toLowerCase().includes(query.toLowerCase()) ||
@@ -64,14 +70,32 @@ export default function SearchModal({ isOpen, onClose }: SearchModalProps) {
     return matchesQuery && matchesCategory;
   });
 
+  // Sort: when there is a query, exact-title-match resources come first,
+  // then other resources, then categories.  Without a query keep original order.
+  const filtered = query
+    ? [...rawFiltered].sort((a, b) => {
+        const q = query.toLowerCase();
+        const aExact = a.title.toLowerCase() === q;
+        const bExact = b.title.toLowerCase() === q;
+        const aResource = a.type === "resource";
+        const bResource = b.type === "resource";
+
+        // Exact resource match → top
+        if (aExact && aResource && !(bExact && bResource)) return -1;
+        if (bExact && bResource && !(aExact && aResource)) return 1;
+        // Resources before categories
+        if (aResource && !bResource) return -1;
+        if (!aResource && bResource) return 1;
+        return 0;
+      })
+    : rawFiltered;
+
   const handleScrollToCategory = useCallback(
     (categoryName: string) => {
-      // Find the matching category slug from the category name
       const slug = categoryName.toLowerCase().replace(/[^a-z0-9]+/g, "-");
       if (window.__scrollToCategory) {
         window.__scrollToCategory(slug);
       } else {
-        // Fallback: plain scroll if CategoryGrid hasn't registered yet
         const el = document.getElementById(slug);
         if (el) el.scrollIntoView({ behavior: "smooth", block: "center" });
       }
@@ -80,23 +104,42 @@ export default function SearchModal({ isOpen, onClose }: SearchModalProps) {
     [onClose]
   );
 
+  // Navigate to the category page and highlight the specific resource card.
+  // Uses URL hash: /categories/<categorySlug>#resource-<resourceId>
+  const handleNavigateToResource = useCallback(
+    (item: (typeof allItems)[number]) => {
+      if (item.type !== "resource") return;
+      const categorySlug =
+        (item as { categorySlug?: string }).categorySlug ??
+        item.category.toLowerCase().replace(/[^a-z0-9]+/g, "-");
+      router.push(`/categories/${categorySlug}#resource-${item.id}`);
+      onClose();
+    },
+    [router, onClose]
+  );
+
   const handleKeyDown = useCallback(
     (e: KeyboardEvent) => {
       if (!isOpen) return;
       if (e.key === "Escape") { onClose(); return; }
-      if (e.key === "ArrowDown") { e.preventDefault(); setActiveIndex((i) => Math.min(i + 1, filtered.length - 1)); }
-      if (e.key === "ArrowUp") { e.preventDefault(); setActiveIndex((i) => Math.max(i - 1, 0)); }
+      if (e.key === "ArrowDown") {
+        e.preventDefault();
+        setActiveIndex((i) => Math.min(i + 1, filtered.length - 1));
+      }
+      if (e.key === "ArrowUp") {
+        e.preventDefault();
+        setActiveIndex((i) => Math.max(i - 1, 0));
+      }
       if (e.key === "Enter" && filtered[activeIndex]) {
         const item = filtered[activeIndex];
         if (item.type === "category") {
           handleScrollToCategory(item.title);
         } else {
-          window.open(item.url, "_blank", "noopener");
-          onClose();
+          handleNavigateToResource(item);
         }
       }
     },
-    [isOpen, filtered, activeIndex, onClose, handleScrollToCategory]
+    [isOpen, filtered, activeIndex, onClose, handleScrollToCategory, handleNavigateToResource]
   );
 
   useEffect(() => {
@@ -254,7 +297,7 @@ export default function SearchModal({ isOpen, onClose }: SearchModalProps) {
               ) : filtered.length === 0 ? (
                 <div className="flex flex-col items-center py-10 sm:py-12">
                   <Search size={28} className="text-white/15 mb-3" />
-                  <p className="text-sm text-white/50">No results found</p>
+                  <p className="text-sm text-white/50">No matching resources found</p>
                   <p className="text-xs mt-1 text-white/25">Try a different search term</p>
                 </div>
               ) : (
@@ -265,8 +308,7 @@ export default function SearchModal({ isOpen, onClose }: SearchModalProps) {
                       if (item.type === "category") {
                         handleScrollToCategory(item.title);
                       } else {
-                        window.open(item.url, "_blank", "noopener");
-                        onClose();
+                        handleNavigateToResource(item);
                       }
                     }}
                     className={`w-full flex items-center gap-3 sm:gap-4 px-4 sm:px-5 py-3 sm:py-3.5 text-left transition-all duration-200 ${
@@ -299,7 +341,12 @@ export default function SearchModal({ isOpen, onClose }: SearchModalProps) {
                         {item.description}
                       </p>
                     </div>
-                    <ExternalLink size={14} className="text-white/15 shrink-0" />
+                    {/* Show internal navigation arrow for resources, external link for legacy parity */}
+                    {item.type === "resource" ? (
+                      <ArrowUpRight size={14} className="text-white/15 shrink-0" />
+                    ) : (
+                      <ExternalLink size={14} className="text-white/15 shrink-0" />
+                    )}
                   </button>
                 ))
               )}
