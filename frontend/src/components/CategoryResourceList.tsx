@@ -11,11 +11,6 @@
  *   - A polished "No results" empty state
  *   - Preserves the existing dark/premium card design 100%
  *
- * PHASE 2.1.1 addition:
- *   - Reads URL hash on mount (#resource-<id>) to scroll + highlight a
- *     specific resource card when navigated to from the global search modal.
- *     Uses a CSS keyframe animation injected once into <head>.
- *
  * NO backend calls, NO new API routes, NO schema changes.
  * Search runs entirely on the already-fetched resources array.
  */
@@ -85,51 +80,6 @@ const emptyVariants = {
     transition: { duration: 0.2, ease: "easeIn" },
   },
 };
-
-// ─── Resource highlight style ─────────────────────────────────────────────────
-
-/**
- * Inject the resource-highlight keyframe animation once into <head>.
- * Premium, focused — subtle border + soft shadow.  No scale, no bounce,
- * no flash, no RGB glow.  Duration ~2.8 s.
- */
-const RESOURCE_HIGHLIGHT_STYLE_ID = "resource-card-highlight-style";
-if (typeof document !== "undefined" && !document.getElementById(RESOURCE_HIGHLIGHT_STYLE_ID)) {
-  const style = document.createElement("style");
-  style.id = RESOURCE_HIGHLIGHT_STYLE_ID;
-  style.textContent = `
-    @keyframes resourceCardHighlight {
-      0%   {
-        border-color: rgb(39 39 42);
-        box-shadow: none;
-        background-color: transparent;
-      }
-      10%  {
-        border-color: rgba(99, 102, 241, 0.55);
-        box-shadow: 0 0 0 1px rgba(99, 102, 241, 0.18),
-                    0 4px 24px rgba(99, 102, 241, 0.14),
-                    inset 0 0 0 1px rgba(99, 102, 241, 0.06);
-        background-color: rgba(99, 102, 241, 0.04);
-      }
-      80%  {
-        border-color: rgba(99, 102, 241, 0.42);
-        box-shadow: 0 0 0 1px rgba(99, 102, 241, 0.12),
-                    0 4px 20px rgba(99, 102, 241, 0.10),
-                    inset 0 0 0 1px rgba(99, 102, 241, 0.04);
-        background-color: rgba(99, 102, 241, 0.025);
-      }
-      100% {
-        border-color: rgb(39 39 42);
-        box-shadow: none;
-        background-color: transparent;
-      }
-    }
-    .resource-card-highlighted {
-      animation: resourceCardHighlight 2.8s cubic-bezier(0.4, 0, 0.2, 1) forwards;
-    }
-  `;
-  document.head.appendChild(style);
-}
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -204,51 +154,6 @@ export default function CategoryResourceList({
     },
     []
   );
-
-  // ── Resource highlight via URL hash ──────────────────────────────────────
-  //
-  // When the global search modal navigates to /categories/<slug>#resource-<id>,
-  // we read the hash on mount, find the matching card, scroll to it, and apply
-  // the premium highlight animation.  Runs once; cleans up the hash afterward
-  // so a page refresh doesn't re-trigger it.
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-
-    const hash = window.location.hash; // e.g. "#resource-64a1b2c3..."
-    if (!hash.startsWith("#resource-")) return;
-
-    const targetId = hash.slice("#resource-".length);
-
-    // Small delay so the page is fully rendered before we try to find the card.
-    const timer = setTimeout(() => {
-      const el = document.getElementById(`resource-card-${targetId}`);
-      if (!el) return;
-
-      // Scroll the card into view — centre it vertically with a bit of breathing room.
-      el.scrollIntoView({ behavior: "smooth", block: "center" });
-
-      // Apply the highlight class slightly after scroll starts so the
-      // animation fires when the card is actually visible.
-      const highlightTimer = setTimeout(() => {
-        el.classList.add("resource-card-highlighted");
-
-        // Remove the class after the animation finishes so hover states work again.
-        const cleanupTimer = setTimeout(() => {
-          el.classList.remove("resource-card-highlighted");
-        }, 3000);
-
-        return () => clearTimeout(cleanupTimer);
-      }, 350);
-
-      // Clean up the hash from the URL so a manual refresh doesn't re-highlight.
-      history.replaceState(null, "", window.location.pathname + window.location.search);
-
-      return () => clearTimeout(highlightTimer);
-    }, 120);
-
-    return () => clearTimeout(timer);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []); // intentionally empty — runs once on mount only
 
   return (
     <div>
@@ -376,8 +281,6 @@ export default function CategoryResourceList({
             {filtered.map((resource) => (
               <motion.a
                 key={resource._id}
-                // Stable DOM id used by the highlight-on-navigate effect above.
-                id={`resource-card-${resource._id}`}
                 variants={cardVariants}
                 href={resource.url}
                 target="_blank"
