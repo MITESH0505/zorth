@@ -1,10 +1,19 @@
 "use client";
 
-import { motion } from "framer-motion";
-import { Github, Twitter, MessageCircle, Mail, Heart } from "lucide-react";
-import { categories } from "@/data/categories";
+import { motion } from "motion/react";
+import {
+  Github,
+  Twitter,
+  MessageCircle,
+  ArrowRight,
+  Heart,
+} from "lucide-react";
+import {
+  TextHoverEffect,
+  FooterBackgroundGradient,
+} from "@/components/ui/hover-footer";
 
-/* ─── Static data (unchanged) ────────────────────────────────────── */
+/* ─── Static data ─────────────────────────────────────────────────── */
 const quickLinks = [
   { label: "Home",       href: "#home"       },
   { label: "Categories", href: "#categories" },
@@ -13,259 +22,451 @@ const quickLinks = [
   { label: "Contribute", href: "#contribute" },
 ];
 
-const socialLinks = [
-  { icon: Github,        href: "https://github.com", label: "GitHub"  },
-  { icon: Twitter,       href: "#",                  label: "Twitter" },
-  { icon: MessageCircle, href: "#",                  label: "Discord" },
-  { icon: Mail,          href: "#",                  label: "Email"   },
+const categoryLinks = [
+  { label: "Anime",       href: "#anime"      },
+  { label: "Movies / TV", href: "#movies-tv"  },
+  { label: "Gaming",      href: "#gaming"     },
+  { label: "Reading",     href: "#reading"    },
+  { label: "AI",          href: "#ai"         },
+  { label: "Software",    href: "#software"   },
 ];
 
-/* ─── Stagger variants for the inner grid columns ────────────────── */
+const communityLinks = [
+  { icon: Github,        href: "https://github.com", label: "GitHub"  },
+  { icon: MessageCircle, href: "#",                  label: "Discord" },
+  { icon: Twitter,       href: "#",                  label: "Twitter" },
+];
+
+/* ─── Shared easing curves ────────────────────────────────────────── */
+const EASE_OUT_QUART: [number, number, number, number] = [0.22, 1, 0.36, 1];
+
+/* ─── Animation variants ──────────────────────────────────────────── */
 const containerVariants = {
   hidden: {},
   show: {
     transition: {
-      staggerChildren: 0.08,
-      delayChildren: 0.55,
+      staggerChildren: 0.07,
+      delayChildren: 0.15,
     },
   },
 };
 
 const colVariants = {
-  hidden: { opacity: 0, y: 18 },
-  show:   { opacity: 1, y: 0,  transition: { duration: 0.55, ease: [0.22, 1, 0.36, 1] } },
+  hidden: { opacity: 0, y: 12 },
+  show: {
+    opacity: 1,
+    y: 0,
+    transition: {
+      duration: 0.65,
+      ease: EASE_OUT_QUART,
+    },
+  },
 };
+
+/* ─── Reusable link row (subtle underline + translate on hover) ───── */
+function FooterLink({ href, label }: { href: string; label: string }) {
+  return (
+    <a
+      href={href}
+      className="group inline-flex items-center text-[13.5px] text-white/60
+        hover:text-white transition-colors duration-300 ease-out"
+    >
+      <span
+        className="relative inline-block transition-transform duration-500
+          [transition-timing-function:cubic-bezier(0.22,1,0.36,1)]
+          group-hover:translate-x-[3px]"
+      >
+        {label}
+        <span
+          aria-hidden="true"
+          className="absolute left-0 -bottom-0.5 h-px w-0 bg-white/80
+            transition-[width] duration-500
+            [transition-timing-function:cubic-bezier(0.22,1,0.36,1)]
+            group-hover:w-full"
+        />
+      </span>
+    </a>
+  );
+}
 
 /* ─── Component ──────────────────────────────────────────────────── */
 export default function Footer() {
   return (
-    /**
-     * liquid-glass shell — floats above the page background with
-     * the frosted-glass border defined in globals.css.
-     * All content, links, icons and logic are exactly as before.
-     */
     <motion.footer
-      className="liquid-glass rounded-3xl mx-4 sm:mx-6 lg:mx-8 mb-8 mt-16 
-      shadow-[0_8px_32px_rgba(0,0,0,0.35)]"
-      initial={{ opacity: 0, y: 40 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 1, delay: 0.4, ease: "easeOut" }}
+      className="relative mt-24 mx-3 sm:mx-5 lg:mx-8 mb-0 overflow-hidden
+        rounded-t-3xl border border-b-0 border-white/10
+        bg-[rgba(7,7,10,0.94)] backdrop-blur-2xl
+        shadow-[0_-1px_0_0_rgba(255,255,255,0.07)_inset,0_-40px_80px_-40px_rgba(0,0,0,0.75)]"
+      initial={{ opacity: 0, y: 30 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, margin: "-80px" }}
+      transition={{ duration: 0.9, ease: EASE_OUT_QUART }}
     >
-      {/* Subtle ambient gradient inside the glass */}
+      {/* Existing base background gradient util */}
+      <FooterBackgroundGradient />
+
+      {/* Top hairline highlight */}
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute inset-0 rounded-3xl overflow-hidden"
+        className="pointer-events-none absolute inset-x-0 top-0 h-px
+          bg-gradient-to-r from-transparent via-white/25 to-transparent"
+      />
+
+      {/* Secondary top glow line — adds cinematic depth */}
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-x-0 top-0 h-[3px]
+          bg-gradient-to-r from-transparent via-white/[0.05] to-transparent
+          blur-[3px]"
+      />
+
+      {/* Ambient washes (strictly monochrome, no blue) */}
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-0 rounded-t-3xl overflow-hidden"
       >
+        {/* Central wash behind the giant ZORTH */}
         <div
-          className="absolute -top-32 -left-20 w-72 h-72 rounded-full opacity-[0.06]"
+          className="absolute bottom-[18%] left-1/2 -translate-x-1/2
+            w-[60rem] h-[36rem] rounded-full opacity-[0.07]"
           style={{
-            background: "radial-gradient(circle, #6366f1 0%, transparent 70%)",
-            filter: "blur(48px)",
+            background:
+              "radial-gradient(ellipse at center, rgba(255,255,255,0.7) 0%, transparent 65%)",
+            filter: "blur(70px)",
+          }}
+        />
+        {/* Soft top wash */}
+        <div
+          className="absolute -top-44 left-1/2 -translate-x-1/2 w-[48rem] h-[48rem]
+            rounded-full opacity-[0.05]"
+          style={{
+            background:
+              "radial-gradient(circle, rgba(255,255,255,0.6) 0%, transparent 70%)",
+            filter: "blur(80px)",
+          }}
+        />
+        {/* Two corner ambient glows */}
+        <div
+          className="absolute -bottom-40 -left-20 w-[30rem] h-[30rem]
+            rounded-full opacity-[0.04]"
+          style={{
+            background:
+              "radial-gradient(circle, rgba(255,255,255,0.55) 0%, transparent 70%)",
+            filter: "blur(70px)",
           }}
         />
         <div
-          className="absolute -bottom-20 right-10 w-56 h-56 rounded-full opacity-[0.05]"
+          className="absolute -bottom-40 -right-20 w-[30rem] h-[30rem]
+            rounded-full opacity-[0.04]"
           style={{
-            background: "radial-gradient(circle, #a855f7 0%, transparent 70%)",
-            filter: "blur(40px)",
+            background:
+              "radial-gradient(circle, rgba(255,255,255,0.55) 0%, transparent 70%)",
+            filter: "blur(70px)",
           }}
         />
       </div>
 
-      {/* ── Main content ────────────────────────────────────────────── */}
+      {/* Fractal noise texture overlay (pure SVG, no asset import) */}
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-0 rounded-t-3xl
+          opacity-[0.03] mix-blend-overlay"
+        style={{
+          backgroundImage:
+            "url(\"data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 0.6 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>\")",
+          backgroundSize: "180px 180px",
+        }}
+      />
+
+      {/* ── TOP SECTION ─ 4 columns ─────────────────────────────────── */}
       <motion.div
-        className="relative z-10 max-w-7xl mx-auto px-6 sm:px-8 lg:px-10 pt-10 sm:pt-12 lg:pt-14 pb-6"
+        className="relative z-10 max-w-7xl mx-auto px-6 sm:px-8 lg:px-12
+          pt-14 sm:pt-16 lg:pt-20 pb-8"
         variants={containerVariants}
         initial="hidden"
-        animate="show"
+        whileInView="show"
+        viewport={{ once: true, margin: "-60px" }}
       >
-        {/* ── 4-column grid ─────────────────────────────────────────── */}
-        <div className="grid gap-8 sm:gap-10 grid-cols-2 lg:grid-cols-4">
-
-          {/* Brand ── full width on mobile, 1 col on lg */}
-          <motion.div className="col-span-2 lg:col-span-1" variants={colVariants}>
-            <a href="#home" className="inline-flex items-center gap-2 mb-4 group">
+        <div
+          className="grid gap-y-10 gap-x-8 sm:gap-x-10 lg:gap-x-12
+            grid-cols-1 sm:grid-cols-2 lg:grid-cols-12"
+        >
+          {/* ── 1. Brand ── */}
+          <motion.div className="lg:col-span-4" variants={colVariants}>
+            <a
+              href="#home"
+              className="inline-flex items-center gap-2.5 mb-5 group"
+            >
               <div
-                className="w-7 h-7 rounded-lg bg-gradient-to-br from-indigo-500 to-purple-600
-                  flex items-center justify-center shadow-sm
-                  transition-transform duration-200 group-hover:scale-105"
+                className="w-9 h-9 rounded-xl flex items-center justify-center
+                  bg-gradient-to-b from-white/[0.10] to-white/[0.04]
+                  border border-white/15 backdrop-blur-md
+                  shadow-[inset_0_1px_0_0_rgba(255,255,255,0.10)]
+                  transition-all duration-500
+                  [transition-timing-function:cubic-bezier(0.22,1,0.36,1)]
+                  group-hover:from-white/[0.16] group-hover:to-white/[0.07]
+                  group-hover:border-white/25
+                  group-hover:shadow-[inset_0_1px_0_0_rgba(255,255,255,0.14),0_0_24px_-4px_rgba(255,255,255,0.18)]"
               >
-                <span className="text-white font-bold text-xs">Z</span>
+                <span
+                  className="text-[14px] font-semibold tracking-wide"
+                  style={{ color: "#f5f5f5" }}
+                >
+                  Z
+                </span>
               </div>
-              <span className="text-base font-bold" style={{ color: "var(--color-text-white)" }}>
-                Zorth
+              <span
+                className="text-[15px] font-semibold tracking-[0.22em]"
+                style={{ color: "#f5f5f5" }}
+              >
+                ZORTH
               </span>
             </a>
 
             <p
-              className="text-sm leading-relaxed mb-5 max-w-xs"
-              style={{ color: "var(--color-text-secondary)" }}
+              className="text-[13.5px] leading-relaxed text-white/55 max-w-[20rem]"
             >
               A curated directory of entertainment and internet resources.
-              Organized. Searchable. Community-driven.
+              Organized, searchable, and shaped by a community that values
+              taste over noise.
             </p>
-
-            {/* Social icons */}
-            <div className="flex items-center flex-wrap gap-2">
-              {socialLinks.map(({ icon: Icon, href, label }) => (
-                <a
-                  key={label}
-                  href={href}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  aria-label={label}
-                  className="p-2 rounded-xl transition-all duration-200
-                    hover:scale-110 hover:bg-white/10"
-                  style={{ color: "var(--color-icon-default)" }}
-                >
-                  <Icon size={18} />
-                </a>
-              ))}
-            </div>
           </motion.div>
 
-          {/* Quick Links */}
-          <motion.div variants={colVariants}>
+          {/* ── 2. Quick Links ── */}
+          <motion.div className="lg:col-span-2" variants={colVariants}>
             <h4
-              className="text-[11px] font-bold uppercase tracking-widest mb-4"
-              style={{ color: "var(--color-text-white)" }}
+              className="text-[11px] font-medium uppercase tracking-[0.24em]
+                text-white/40 mb-5"
             >
               Quick Links
             </h4>
             <ul className="space-y-3">
               {quickLinks.map((link) => (
                 <li key={link.label}>
-                  <a
-                    href={link.href}
-                    className="text-sm transition-colors duration-150"
-                    style={{ color: "var(--color-text-secondary)" }}
-                    onMouseEnter={(e) => (e.currentTarget.style.color = "var(--color-accent)")}
-                    onMouseLeave={(e) => (e.currentTarget.style.color = "var(--color-text-secondary)")}
-                  >
-                    {link.label}
-                  </a>
+                  <FooterLink href={link.href} label={link.label} />
                 </li>
               ))}
             </ul>
           </motion.div>
 
-          {/* Categories */}
-          <motion.div variants={colVariants}>
+          {/* ── 3. Categories ── */}
+          <motion.div className="lg:col-span-2" variants={colVariants}>
             <h4
-              className="text-[11px] font-bold uppercase tracking-widest mb-4"
-              style={{ color: "var(--color-text-white)" }}
+              className="text-[11px] font-medium uppercase tracking-[0.24em]
+                text-white/40 mb-5"
             >
               Categories
             </h4>
             <ul className="space-y-3">
-              {categories.slice(0, 6).map((cat) => (
-                <li key={cat.id}>
-                  <a
-                    href={`#${cat.slug}`}
-                    className="text-sm transition-colors duration-150"
-                    style={{ color: "var(--color-text-secondary)" }}
-                    onMouseEnter={(e) => (e.currentTarget.style.color = "var(--color-accent)")}
-                    onMouseLeave={(e) => (e.currentTarget.style.color = "var(--color-text-secondary)")}
-                  >
-                    {cat.name}
-                  </a>
+              {categoryLinks.map((cat) => (
+                <li key={cat.label}>
+                  <FooterLink href={cat.href} label={cat.label} />
                 </li>
               ))}
-              <li>
-                <a
-                  href="#categories"
-                  className="text-sm font-medium transition-opacity duration-150 hover:opacity-75"
-                  style={{ color: "var(--color-link-accent)" }}
-                >
-                  View all →
-                </a>
-              </li>
             </ul>
           </motion.div>
 
-          {/* Newsletter + Contribute ── full width on mobile */}
-          <motion.div className="col-span-2 lg:col-span-1" variants={colVariants}>
+          {/* ── 4. Community + Newsletter ── */}
+          <motion.div className="lg:col-span-4" variants={colVariants}>
             <h4
-              className="text-[11px] font-bold uppercase tracking-widest mb-3.5"
-              style={{ color: "var(--color-text-white)" }}
+              className="text-[11px] font-medium uppercase tracking-[0.24em]
+                text-white/40 mb-3"
             >
-              Stay Updated
+              Stay In The Loop
             </h4>
-            <p className="text-sm mb-4 leading-relaxed" style={{ color: "var(--color-text-secondary)" }}>
-              Get notified about new resources and updates.
+            <p className="text-[13px] leading-relaxed text-white/55 mb-4 max-w-sm">
+              Quiet updates on new resources. No spam, no marketing — just
+              signal.
             </p>
 
-            {/* Newsletter input — glass-compatible surface */}
-            <div className="flex gap-2.5">
+            <form
+              onSubmit={(e) => e.preventDefault()}
+              className="group/form flex items-center gap-2 p-1.5
+                rounded-2xl bg-white/[0.035] border border-white/[0.09]
+                backdrop-blur-xl
+                transition-all duration-500
+                [transition-timing-function:cubic-bezier(0.22,1,0.36,1)]
+                hover:bg-white/[0.055] hover:border-white/[0.18]
+                focus-within:bg-white/[0.06] focus-within:border-white/25
+                focus-within:shadow-[0_0_0_4px_rgba(255,255,255,0.04),inset_0_1px_0_0_rgba(255,255,255,0.07)]
+                shadow-[inset_0_1px_0_0_rgba(255,255,255,0.05)]"
+            >
               <input
                 type="email"
                 placeholder="your@email.com"
-                className="flex-1 min-w-0 px-3.5 py-2.5 rounded-xl text-sm focus:outline-none transition-colors"
-                style={{
-                  backgroundColor: "rgba(255, 255, 255, 0.06)",
-                  border: "1px solid rgba(255, 255, 255, 0.1)",
-                  color: "var(--color-text-white)",
-                }}
-                onFocus={(e) => (e.target.style.borderColor = "rgba(99, 102, 241, 0.45)")}
-                onBlur={(e)  => (e.target.style.borderColor = "rgba(255, 255, 255, 0.1)")}
+                aria-label="Email address"
+                className="flex-1 min-w-0 bg-transparent px-3 py-2 text-[13px]
+                  text-white placeholder:text-white/35
+                  focus:outline-none"
               />
-              <button
-                type="button"
+              <motion.button
+                type="submit"
                 aria-label="Subscribe"
-                className="shrink-0 w-[2.625rem] h-[2.625rem] rounded-xl text-white flex items-center
-                  justify-center bg-gradient-to-br from-indigo-500 to-purple-600
-                  hover:opacity-90 transition-opacity shadow-sm"
+                whileHover={{ scale: 1.06 }}
+                whileTap={{ scale: 0.96 }}
+                transition={{ duration: 0.35, ease: EASE_OUT_QUART }}
+                className="shrink-0 inline-flex items-center justify-center
+                  h-9 w-9 rounded-xl
+                  bg-white/[0.08] border border-white/15
+                  text-white/85
+                  transition-[background-color,border-color,color,box-shadow]
+                  duration-300 ease-out
+                  hover:bg-white/[0.16] hover:border-white/30 hover:text-white
+                  hover:shadow-[0_4px_20px_-6px_rgba(255,255,255,0.18),inset_0_1px_0_0_rgba(255,255,255,0.12)]"
               >
-                <Mail size={16} />
-              </button>
-            </div>
+                <ArrowRight size={15} strokeWidth={1.8} />
+              </motion.button>
+            </form>
 
-            {/* Divider — glass-appropriate */}
-            <div className="my-5 border-t border-white/[0.08]" />
+            {/* Inline divider */}
+            <div className="my-6 h-px bg-gradient-to-r from-transparent via-white/[0.10] to-transparent" />
 
-            {/* Contribute */}
+            {/* Community */}
             <h4
-              className="text-[11px] font-bold uppercase tracking-widest mb-3"
-              style={{ color: "var(--color-text-white)" }}
+              className="text-[11px] font-medium uppercase tracking-[0.24em]
+                text-white/40 mb-4"
             >
-              Contribute
+              Community
             </h4>
-            <a
-              href="https://github.com"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm
-                transition-all duration-150 w-full sm:w-auto
-                hover:border-indigo-500/30 hover:bg-white/[0.06]"
-              style={{
-                backgroundColor: "rgba(255, 255, 255, 0.05)",
-                border: "1px solid rgba(255, 255, 255, 0.1)",
-                color: "var(--color-text-secondary)",
-              }}
+
+            {/* Glass pill */}
+            <div
+              className="inline-flex items-center gap-1 p-1.5
+                rounded-2xl bg-white/[0.04] border border-white/[0.09]
+                backdrop-blur-xl
+                transition-all duration-500
+                [transition-timing-function:cubic-bezier(0.22,1,0.36,1)]
+                hover:border-white/[0.18] hover:bg-white/[0.065]
+                shadow-[inset_0_1px_0_0_rgba(255,255,255,0.06)]"
             >
-              <Github size={14} style={{ color: "var(--color-icon-default)" }} />
-              Suggest a Resource
-            </a>
+              {communityLinks.map(({ icon: Icon, href, label }) => (
+                <motion.a
+                  key={label}
+                  href={href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label={label}
+                  whileHover={{ y: -3, scale: 1.05 }}
+                  whileTap={{ scale: 0.96 }}
+                  transition={{ duration: 0.45, ease: EASE_OUT_QUART }}
+                  className="group/icon relative inline-flex items-center justify-center
+                    h-9 w-9 rounded-xl text-white/60
+                    transition-[background-color,color,box-shadow,filter]
+                    duration-500
+                    [transition-timing-function:cubic-bezier(0.22,1,0.36,1)]
+                    hover:text-white hover:bg-white/[0.10]
+                    hover:brightness-125
+                    hover:shadow-[0_6px_18px_-6px_rgba(255,255,255,0.22),inset_0_1px_0_0_rgba(255,255,255,0.10)]"
+                >
+                  <Icon size={16} strokeWidth={1.8} />
+                </motion.a>
+              ))}
+            </div>
           </motion.div>
         </div>
+      </motion.div>
 
-        {/* ── Bottom bar ────────────────────────────────────────────── */}
+      {/* ── MIDDLE DIVIDER + TAGLINE ────────────────────────────────── */}
+      <div className="relative z-10 max-w-7xl mx-auto px-6 sm:px-8 lg:px-12">
+        <div className="relative flex items-center justify-center py-1">
+          {/* Refined luxurious divider — layered hairline + soft glow */}
+          <div className="absolute inset-x-0 top-1/2 -translate-y-1/2 h-px bg-gradient-to-r from-transparent via-white/[0.12] to-transparent" />
+          <div className="absolute inset-x-0 top-1/2 -translate-y-1/2 h-[2px] bg-gradient-to-r from-transparent via-white/[0.04] to-transparent blur-[2px]" />
+          <motion.span
+            initial={{ opacity: 0, letterSpacing: "0.24em" }}
+            whileInView={{ opacity: 0.35, letterSpacing: "0.34em" }}
+            viewport={{ once: true, margin: "-40px" }}
+            transition={{ duration: 1.1, ease: EASE_OUT_QUART, delay: 0.1 }}
+            className="relative px-5 text-[10.5px] font-medium uppercase
+              text-white whitespace-nowrap
+              bg-[rgba(7,7,10,0.94)]"
+          >
+            Built for people who value quality over quantity
+          </motion.span>
+        </div>
+      </div>
+
+      {/* ── SIGNATURE GIANT ZORTH ───────────────────────────────────── */}
+      <div
+        className="relative z-10 max-w-[100rem] mx-auto px-2 sm:px-4 lg:px-6
+          mt-3 sm:mt-4"
+      >
+        {/* Soft radial wash directly behind the wordmark */}
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-x-0 top-1/2 -translate-y-1/2
+            h-[80%] opacity-60"
+          style={{
+            background:
+              "radial-gradient(ellipse at center, rgba(255,255,255,0.06) 0%, transparent 60%)",
+            filter: "blur(40px)",
+          }}
+        />
+
         <motion.div
-          className="mt-8 sm:mt-10 pt-5 border-t border-white/[0.08]
-            flex flex-col sm:flex-row items-center justify-between gap-4
-            text-center sm:text-left"
-          variants={colVariants}
+          aria-hidden="true"
+          initial={{ opacity: 0, scale: 0.985, y: 6 }}
+          whileInView={{ opacity: 0.1, scale: 1, y: 0 }}
+          whileHover={{ opacity: 0.18, scale: 1.03 }}
+          viewport={{ once: true, margin: "-40px" }}
+          transition={{
+            opacity: { duration: 1.4, ease: EASE_OUT_QUART, delay: 0.15 },
+            scale:   { duration: 1.4, ease: EASE_OUT_QUART },
+            y:       { duration: 1.4, ease: EASE_OUT_QUART },
+          }}
+          style={{
+            filter:
+              "grayscale(1) brightness(1.6) drop-shadow(0 0 24px rgba(255,255,255,0.08))",
+            transformOrigin: "center",
+          }}
+          className="select-none cursor-default
+            h-[11rem] sm:h-[15rem] md:h-[19rem] lg:h-[23rem]
+            will-change-[opacity,transform]"
         >
-          <p className="text-xs leading-relaxed" style={{ color: "var(--color-muted)" }}>
-            © {new Date().getFullYear()} Zorth. All rights reserved.
-            <span className="hidden sm:inline">
-              {" "}— Does not host any copyrighted content.
-            </span>
-          </p>
-          <p className="text-xs flex items-center gap-1.5" style={{ color: "var(--color-muted)" }}>
-            Made with <Heart size={10} className="text-red-400" fill="currentColor" /> by the community
-          </p>
+          <TextHoverEffect text="ZORTH" duration={0} />
         </motion.div>
+      </div>
+
+      {/* ── BOTTOM ROW ──────────────────────────────────────────────── */}
+      <motion.div
+        initial={{ opacity: 0, y: 10 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true, margin: "-40px" }}
+        transition={{ duration: 0.7, ease: EASE_OUT_QUART, delay: 0.2 }}
+        className="relative z-10 max-w-7xl mx-auto px-6 sm:px-8 lg:px-12
+          pb-7 sm:pb-8 -mt-1"
+      >
+        <div className="pt-5 border-t border-white/[0.07]">
+          <div
+            className="flex flex-col sm:flex-row items-center justify-center
+              gap-2 sm:gap-0 text-center"
+          >
+            <p className="text-[12px] text-white/45 tracking-[0.02em]">
+              © 2026 Zorth
+            </p>
+            <span
+              aria-hidden="true"
+              className="hidden sm:inline-block mx-4 h-3 w-px bg-white/15"
+            />
+            <p className="text-[12px] text-white/40 tracking-[0.02em] italic">
+              Curated with care
+            </p>
+            <span
+              aria-hidden="true"
+              className="hidden sm:inline-block mx-4 h-3 w-px bg-white/15"
+            />
+            <p className="text-[12px] text-white/45 inline-flex items-center gap-1.5 tracking-[0.02em]">
+              Made with
+              <Heart
+                size={11}
+                className="text-white/75"
+                fill="currentColor"
+                aria-hidden="true"
+              />
+              by the community
+            </p>
+          </div>
+        </div>
       </motion.div>
     </motion.footer>
   );
