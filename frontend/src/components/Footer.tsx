@@ -368,18 +368,23 @@ export default function Footer() {
 
       {/* ── MIDDLE DIVIDER + TAGLINE ────────────────────────────────── */}
       <div className="relative z-10 max-w-7xl mx-auto px-6 sm:px-8 lg:px-12">
-        <div className="relative flex items-center justify-center py-1">
-          {/* Refined luxurious divider — layered hairline + soft glow */}
-          <div className="absolute inset-x-0 top-1/2 -translate-y-1/2 h-px bg-gradient-to-r from-transparent via-white/[0.12] to-transparent" />
-          <div className="absolute inset-x-0 top-1/2 -translate-y-1/2 h-[2px] bg-gradient-to-r from-transparent via-white/[0.04] to-transparent blur-[2px]" />
+        {/* Divider sits strictly above the tagline — never through it */}
+        <div className="relative h-px mb-4 sm:mb-5" aria-hidden="true">
+          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/[0.12] to-transparent" />
+          <div className="absolute inset-0 h-[2px] bg-gradient-to-r from-transparent via-white/[0.04] to-transparent blur-[2px]" />
+        </div>
+
+        {/* Tagline — full-width centered, wraps gracefully on small screens */}
+        <div className="flex justify-center pb-1">
           <motion.span
             initial={{ opacity: 0, letterSpacing: "0.24em" }}
             whileInView={{ opacity: 0.35, letterSpacing: "0.34em" }}
             viewport={{ once: true, margin: "-40px" }}
             transition={{ duration: 1.1, ease: EASE_OUT_QUART, delay: 0.1 }}
-            className="relative px-5 text-[10.5px] font-medium uppercase
-              text-white whitespace-nowrap
-              bg-[rgba(7,7,10,0.94)]"
+            className="text-[10px] sm:text-[10.5px] font-medium uppercase
+              text-white text-center leading-relaxed
+              tracking-[0.2em] sm:tracking-[0.34em]
+              px-2 sm:px-5 max-w-[90vw] sm:max-w-none"
           >
             Built for people who value quality over quantity
           </motion.span>
@@ -389,7 +394,7 @@ export default function Footer() {
       {/* ── SIGNATURE GIANT ZORTH ───────────────────────────────────── */}
       <div
         className="relative z-10 max-w-[100rem] mx-auto px-2 sm:px-4 lg:px-6
-          mt-3 sm:mt-4"
+          mt-2 sm:mt-4 overflow-hidden"
       >
         {/* Soft radial wash directly behind the wordmark */}
         <div
