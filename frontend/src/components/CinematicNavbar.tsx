@@ -56,17 +56,17 @@ export default function CinematicNavbar({ onSearchOpen }: CinematicNavbarProps) 
       className="fixed top-0 left-0 right-0 z-50"
       style={{
         fontFamily: "'Inter', sans-serif",
-        backgroundColor: scrolled ? "rgba(8, 7, 9, 0.72)" : "rgba(8, 7, 9, 0)",
-        backdropFilter: scrolled ? "blur(20px) saturate(140%)" : "blur(0px)",
-        WebkitBackdropFilter: scrolled ? "blur(20px) saturate(140%)" : "blur(0px)",
+        backgroundColor: scrolled ? "rgba(8, 7, 9, 0.66)" : "rgba(8, 7, 9, 0)",
+        backdropFilter: scrolled ? "blur(16px) saturate(135%)" : "blur(0px)",
+        WebkitBackdropFilter: scrolled ? "blur(16px) saturate(135%)" : "blur(0px)",
         borderBottom: scrolled
           ? "1px solid rgba(255, 255, 255, 0.04)"
           : "1px solid rgba(255, 255, 255, 0)",
         boxShadow: scrolled
-          ? "0 1px 0 rgba(255,255,255,0.02), 0 12px 32px -16px rgba(0,0,0,0.6)"
+          ? "0 8px 28px -18px rgba(0,0,0,0.55)"
           : "none",
         transition:
-          "background-color 600ms ease, backdrop-filter 600ms ease, border-color 600ms ease, box-shadow 600ms ease",
+          "background-color 420ms ease, backdrop-filter 420ms ease, border-color 420ms ease, box-shadow 420ms ease",
       }}
     >
       <div
@@ -75,9 +75,9 @@ export default function CinematicNavbar({ onSearchOpen }: CinematicNavbarProps) 
           maxWidth: "1320px",
           paddingLeft: "clamp(20px, 4vw, 40px)",
           paddingRight: "clamp(20px, 4vw, 40px)",
-          paddingTop: scrolled ? "14px" : "22px",
-          paddingBottom: scrolled ? "14px" : "22px",
-          transition: "padding 600ms ease",
+          paddingTop: scrolled ? 14 : 20,
+          paddingBottom: scrolled ? 14 : 20,
+          transition: "padding 420ms ease",
         }}
       >
         {/* ─────────── LEFT — Monogram + Wordmark ─────────── */}
@@ -85,7 +85,8 @@ export default function CinematicNavbar({ onSearchOpen }: CinematicNavbarProps) 
           href="#home"
           onClick={scrollHome}
           aria-label="Zorth — home"
-          className="group flex items-center gap-2.5 shrink-0 select-none"
+          className="group flex items-center shrink-0 select-none"
+          style={{ gap: 10 }}
         >
           <span
             aria-hidden
@@ -94,14 +95,13 @@ export default function CinematicNavbar({ onSearchOpen }: CinematicNavbarProps) 
               width: 22,
               height: 22,
               borderRadius: 6,
-              border: "1px solid rgba(255,255,255,0.12)",
-              background:
-                "linear-gradient(135deg, rgba(255,255,255,0.04) 0%, rgba(255,255,255,0.01) 100%)",
-              color: "rgba(255, 220, 210, 0.78)",
+              border: "1px solid rgba(255,255,255,0.10)",
+              backgroundColor: "rgba(255,255,255,0.02)",
+              color: "rgba(255, 220, 210, 0.82)",
               fontSize: 10.5,
               fontWeight: 600,
-              letterSpacing: "0.04em",
-              transition: "color 300ms ease, border-color 300ms ease",
+              letterSpacing: "0.02em",
+              transition: "color 280ms ease, border-color 280ms ease, background-color 280ms ease",
             }}
           >
             Z
@@ -109,10 +109,10 @@ export default function CinematicNavbar({ onSearchOpen }: CinematicNavbarProps) 
           <span
             className="text-white/85 group-hover:text-white"
             style={{
-              fontSize: 13,
+              fontSize: 12.5,
               fontWeight: 500,
-              letterSpacing: "0.28em",
-              transition: "color 300ms ease",
+              letterSpacing: "0.22em",
+              transition: "color 280ms ease",
             }}
           >
             ZORTH
@@ -120,7 +120,10 @@ export default function CinematicNavbar({ onSearchOpen }: CinematicNavbarProps) 
         </a>
 
         {/* ─────────── CENTER — Nav Links ─────────── */}
-        <div className="hidden lg:flex items-center" style={{ gap: 4 }}>
+        <div
+          className="hidden lg:flex items-center"
+          style={{ gap: 2 }}
+        >
           {NAV_LINKS.map((link) => (
             <NavItem
               key={link.slug}
@@ -139,32 +142,36 @@ export default function CinematicNavbar({ onSearchOpen }: CinematicNavbarProps) 
             className="hidden md:flex items-center group"
             style={{
               gap: 10,
-              height: 34,
-              paddingLeft: 12,
-              paddingRight: 6,
+              height: 32,
+              paddingLeft: 11,
+              paddingRight: 5,
               borderRadius: 8,
-              border: "1px solid rgba(255,255,255,0.06)",
-              backgroundColor: "rgba(255,255,255,0.018)",
+              border: "1px solid rgba(255,255,255,0.045)",
+              backgroundColor: "rgba(255,255,255,0.012)",
               transition:
                 "border-color 220ms ease, background-color 220ms ease",
             }}
             onMouseEnter={(e) => {
-              e.currentTarget.style.borderColor = "rgba(255,255,255,0.11)";
-              e.currentTarget.style.backgroundColor = "rgba(255,255,255,0.035)";
+              e.currentTarget.style.borderColor = "rgba(255,255,255,0.10)";
+              e.currentTarget.style.backgroundColor = "rgba(255,255,255,0.03)";
             }}
             onMouseLeave={(e) => {
-              e.currentTarget.style.borderColor = "rgba(255,255,255,0.06)";
-              e.currentTarget.style.backgroundColor = "rgba(255,255,255,0.018)";
+              e.currentTarget.style.borderColor = "rgba(255,255,255,0.045)";
+              e.currentTarget.style.backgroundColor = "rgba(255,255,255,0.012)";
             }}
           >
-            <Search size={13} className="text-white/35 group-hover:text-white/65 transition-colors duration-200" />
+            <Search
+              size={12.5}
+              className="text-white/30 group-hover:text-white/65 transition-colors duration-200"
+              strokeWidth={1.75}
+            />
             <span
-              className="text-white/40 group-hover:text-white/70 transition-colors duration-200"
+              className="text-white/35 group-hover:text-white/70 transition-colors duration-200"
               style={{
-                fontSize: 12.5,
+                fontSize: 12,
                 fontWeight: 400,
-                letterSpacing: "0.01em",
-                minWidth: 56,
+                letterSpacing: "0.005em",
+                minWidth: 52,
                 textAlign: "left",
               }}
             >
@@ -173,14 +180,13 @@ export default function CinematicNavbar({ onSearchOpen }: CinematicNavbarProps) 
             <kbd
               className="hidden lg:inline-flex items-center justify-center"
               style={{
-                height: 22,
-                minWidth: 30,
-                padding: "0 6px",
-                borderRadius: 5,
-                border: "1px solid rgba(255,255,255,0.05)",
-                backgroundColor: "rgba(255,255,255,0.025)",
+                height: 20,
+                minWidth: 28,
+                padding: "0 5px",
+                borderRadius: 4,
+                backgroundColor: "rgba(255,255,255,0.03)",
                 color: "rgba(255,255,255,0.32)",
-                fontSize: 10.5,
+                fontSize: 10,
                 fontWeight: 500,
                 letterSpacing: "0.04em",
                 fontFamily:
@@ -197,16 +203,16 @@ export default function CinematicNavbar({ onSearchOpen }: CinematicNavbarProps) 
             aria-label="Search"
             className="md:hidden flex items-center justify-center"
             style={{
-              width: 34,
-              height: 34,
+              width: 32,
+              height: 32,
               borderRadius: 8,
-              border: "1px solid rgba(255,255,255,0.06)",
-              backgroundColor: "rgba(255,255,255,0.018)",
+              border: "1px solid rgba(255,255,255,0.045)",
+              backgroundColor: "rgba(255,255,255,0.012)",
               color: "rgba(255,255,255,0.55)",
               transition: "all 200ms ease",
             }}
           >
-            <Search size={14} />
+            <Search size={13.5} strokeWidth={1.75} />
           </button>
 
           {/* Divider */}
@@ -215,7 +221,7 @@ export default function CinematicNavbar({ onSearchOpen }: CinematicNavbarProps) 
             className="hidden md:block"
             style={{
               width: 1,
-              height: 18,
+              height: 14,
               backgroundColor: "rgba(255,255,255,0.06)",
               marginLeft: 4,
               marginRight: 4,
@@ -227,27 +233,25 @@ export default function CinematicNavbar({ onSearchOpen }: CinematicNavbarProps) 
             aria-label="Sign in"
             className="hidden sm:flex items-center justify-center"
             style={{
-              height: 34,
-              paddingLeft: 16,
-              paddingRight: 16,
+              height: 32,
+              paddingLeft: 14,
+              paddingRight: 14,
               borderRadius: 8,
               border: "1px solid rgba(255,255,255,0.10)",
               backgroundColor: "transparent",
-              color: "rgba(255,255,255,0.78)",
-              fontSize: 12.5,
+              color: "rgba(255,255,255,0.80)",
+              fontSize: 12,
               fontWeight: 500,
-              letterSpacing: "0.015em",
+              letterSpacing: "0.01em",
               transition: "all 220ms ease",
             }}
             onMouseEnter={(e) => {
               e.currentTarget.style.borderColor = "rgba(255,255,255,0.22)";
               e.currentTarget.style.color = "rgba(255,255,255,1)";
-              e.currentTarget.style.backgroundColor = "rgba(255,255,255,0.025)";
             }}
             onMouseLeave={(e) => {
               e.currentTarget.style.borderColor = "rgba(255,255,255,0.10)";
-              e.currentTarget.style.color = "rgba(255,255,255,0.78)";
-              e.currentTarget.style.backgroundColor = "transparent";
+              e.currentTarget.style.color = "rgba(255,255,255,0.80)";
             }}
           >
             Sign in
@@ -259,12 +263,12 @@ export default function CinematicNavbar({ onSearchOpen }: CinematicNavbarProps) 
             aria-label={mobileOpen ? "Close menu" : "Open menu"}
             className="lg:hidden relative flex items-center justify-center"
             style={{
-              width: 34,
-              height: 34,
+              width: 32,
+              height: 32,
               borderRadius: 8,
-              border: "1px solid rgba(255,255,255,0.07)",
-              backgroundColor: "rgba(255,255,255,0.018)",
-              color: "rgba(255,255,255,0.7)",
+              border: "1px solid rgba(255,255,255,0.06)",
+              backgroundColor: "rgba(255,255,255,0.012)",
+              color: "rgba(255,255,255,0.70)",
               transition: "all 200ms ease",
             }}
           >
@@ -272,27 +276,25 @@ export default function CinematicNavbar({ onSearchOpen }: CinematicNavbarProps) 
               className="absolute"
               style={{
                 opacity: mobileOpen ? 0 : 1,
-                transform: mobileOpen ? "scale(0.7)" : "scale(1)",
-                transition: "opacity 220ms ease, transform 220ms ease",
+                transition: "opacity 180ms ease",
               }}
             >
-              <Menu size={15} strokeWidth={1.6} />
+              <Menu size={14} strokeWidth={1.6} />
             </span>
             <span
               className="absolute"
               style={{
                 opacity: mobileOpen ? 1 : 0,
-                transform: mobileOpen ? "scale(1)" : "scale(0.7)",
-                transition: "opacity 220ms ease, transform 220ms ease",
+                transition: "opacity 180ms ease",
               }}
             >
-              <X size={15} strokeWidth={1.6} />
+              <X size={14} strokeWidth={1.6} />
             </span>
           </button>
         </div>
       </div>
 
-      {/* Hairline beneath the row when scrolled — supports hero, no banner feel */}
+      {/* Hairline beneath the row when scrolled */}
       <div
         aria-hidden
         style={{
@@ -302,9 +304,9 @@ export default function CinematicNavbar({ onSearchOpen }: CinematicNavbarProps) 
           bottom: -1,
           height: 1,
           background:
-            "linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.05) 20%, rgba(255,255,255,0.05) 80%, transparent 100%)",
+            "linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.05) 22%, rgba(255,255,255,0.05) 78%, transparent 100%)",
           opacity: scrolled ? 1 : 0,
-          transition: "opacity 600ms ease",
+          transition: "opacity 420ms ease",
         }}
       />
 
@@ -317,26 +319,26 @@ export default function CinematicNavbar({ onSearchOpen }: CinematicNavbarProps) 
           opacity: mobileOpen ? 1 : 0,
           pointerEvents: mobileOpen ? "auto" : "none",
           transition:
-            "max-height 520ms cubic-bezier(0.16,1,0.3,1), opacity 320ms ease",
+            "max-height 480ms cubic-bezier(0.16,1,0.3,1), opacity 280ms ease",
         }}
       >
         <div
           style={{
-            backgroundColor: "rgba(8, 7, 9, 0.92)",
-            backdropFilter: "blur(28px) saturate(150%)",
-            WebkitBackdropFilter: "blur(28px) saturate(150%)",
+            backgroundColor: "rgba(8, 7, 9, 0.88)",
+            backdropFilter: "blur(22px) saturate(140%)",
+            WebkitBackdropFilter: "blur(22px) saturate(140%)",
             borderTop: "1px solid rgba(255,255,255,0.04)",
           }}
         >
-          <div style={{ padding: "18px clamp(20px, 4vw, 40px) 8px" }}>
+          <div style={{ padding: "18px clamp(20px, 4vw, 40px) 6px" }}>
             <p
               style={{
-                fontSize: 10,
+                fontSize: 9.5,
                 fontWeight: 500,
                 textTransform: "uppercase",
                 color: "rgba(255,255,255,0.22)",
-                letterSpacing: "0.16em",
-                paddingBottom: 14,
+                letterSpacing: "0.18em",
+                paddingBottom: 12,
               }}
             >
               Browse
@@ -348,16 +350,16 @@ export default function CinematicNavbar({ onSearchOpen }: CinematicNavbarProps) 
                   onClick={() => handleNav(link.slug)}
                   className="text-left"
                   style={{
-                    padding: "12px 4px",
-                    color: "rgba(255,255,255,0.62)",
+                    padding: "13px 2px",
+                    color: "rgba(255,255,255,0.66)",
                     fontSize: 14,
                     fontWeight: 400,
-                    letterSpacing: "0.01em",
+                    letterSpacing: "0.005em",
                     borderBottom: "1px solid rgba(255,255,255,0.035)",
                     transition: "color 180ms ease",
                   }}
                   onMouseEnter={(e) => (e.currentTarget.style.color = "rgba(255,255,255,0.95)")}
-                  onMouseLeave={(e) => (e.currentTarget.style.color = "rgba(255,255,255,0.62)")}
+                  onMouseLeave={(e) => (e.currentTarget.style.color = "rgba(255,255,255,0.66)")}
                 >
                   {link.label}
                 </button>
@@ -379,15 +381,15 @@ export default function CinematicNavbar({ onSearchOpen }: CinematicNavbarProps) 
                 gap: 8,
                 height: 38,
                 borderRadius: 8,
-                border: "1px solid rgba(255,255,255,0.07)",
-                backgroundColor: "rgba(255,255,255,0.02)",
-                color: "rgba(255,255,255,0.7)",
-                fontSize: 13,
+                border: "1px solid rgba(255,255,255,0.06)",
+                backgroundColor: "rgba(255,255,255,0.015)",
+                color: "rgba(255,255,255,0.72)",
+                fontSize: 12.5,
                 fontWeight: 500,
-                letterSpacing: "0.015em",
+                letterSpacing: "0.01em",
               }}
             >
-              <Search size={13} />
+              <Search size={13} strokeWidth={1.75} />
               Search
             </button>
             <button
@@ -398,10 +400,10 @@ export default function CinematicNavbar({ onSearchOpen }: CinematicNavbarProps) 
                 borderRadius: 8,
                 border: "1px solid rgba(255,255,255,0.12)",
                 backgroundColor: "transparent",
-                color: "rgba(255,255,255,0.85)",
-                fontSize: 13,
+                color: "rgba(255,255,255,0.88)",
+                fontSize: 12.5,
                 fontWeight: 500,
-                letterSpacing: "0.015em",
+                letterSpacing: "0.01em",
               }}
             >
               Sign in
@@ -419,39 +421,22 @@ interface NavItemProps {
 }
 
 function NavItem({ label, onPress }: NavItemProps) {
-  const [hovered, setHovered] = useState(false);
-
   return (
     <button
       onClick={onPress}
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
+      className="relative text-white/45 hover:text-white/95"
       style={{
-        position: "relative",
-        padding: "8px 14px",
+        padding: "8px 12px",
         fontSize: 12.5,
         fontWeight: 400,
-        letterSpacing: "0.012em",
-        color: hovered ? "rgba(255,255,255,0.92)" : "rgba(255,255,255,0.42)",
+        letterSpacing: "0.005em",
         background: "transparent",
         border: "none",
         cursor: "pointer",
-        transition: "color 260ms ease",
+        transition: "color 240ms ease",
       }}
     >
-      <span
-        aria-hidden
-        style={{
-          position: "absolute",
-          inset: 0,
-          borderRadius: 7,
-          backgroundColor: "rgba(255,255,255,0.025)",
-          opacity: hovered ? 1 : 0,
-          transition: "opacity 220ms ease",
-          pointerEvents: "none",
-        }}
-      />
-      <span style={{ position: "relative" }}>{label}</span>
+      {label}
     </button>
   );
 }
