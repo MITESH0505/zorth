@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Search, X, ExternalLink, TrendingUp } from "lucide-react";
 import { categories } from "@/data/categories";
@@ -29,6 +29,63 @@ const panelVariants = {
   exit: { opacity: 0, scale: 0.94, y: -8 },
 };
 
+/** Internal shape used only inside this component for ranking.
+ *  We read `subcategory` / `tags` defensively so types.ts doesn't need changes. */
+type SearchableItem = {
+  id: string;
+  title: string;
+  description: string;
+  category: string;
+  subcategory: string;
+  tags: string[];
+  type: "category" | "resource";
+  url?: string;
+};
+
+// Ranking buckets (lower = better)
+const RANK = {
+  EXACT_TITLE: 0,
+  TITLE_STARTS_WITH: 1,
+  TITLE_CONTAINS: 2,
+  CATEGORY_MATCH: 3,
+  SUBCATEGORY_MATCH: 4,
+  TAG_MATCH: 5,
+  NO_MATCH: Number.POSITIVE_INFINITY,
+} as const;
+
+/** Safe string normalize for case-insensitive compare. */
+const norm = (v: unknown): string =>
+  typeof v === "string" ? v.toLowerCase().trim() : "";
+
+/** Safely extract optional `subcategory` / `tags` without touching types.ts. */
+function readOptional(source: unknown): { subcategory: string; tags: string[] } {
+  const obj = (source ?? {}) as { subcategory?: unknown; tags?: unknown };
+  const subcategory = typeof obj.subcategory === "string" ? obj.subcategory : "";
+  const tags = Array.isArray(obj.tags)
+    ? obj.tags.filter((t): t is string => typeof t === "string")
+    : [];
+  return { subcategory, tags };
+}
+
+/** Compute ranking score for an item against a normalized query.
+ *  Returns RANK.NO_MATCH when nothing matches. */
+function scoreItem(item: SearchableItem, q: string): number {
+  if (!q) return RANK.NO_MATCH;
+
+  const title = norm(item.title);
+  const category = norm(item.category);
+  const subcategory = norm(item.subcategory);
+
+  if (title === q) return RANK.EXACT_TITLE;
+  if (title.startsWith(q)) return RANK.TITLE_STARTS_WITH;
+  if (title.includes(q)) return RANK.TITLE_CONTAINS;
+  if (category.includes(q)) return RANK.CATEGORY_MATCH;
+  if (subcategory && subcategory.includes(q)) return RANK.SUBCATEGORY_MATCH;
+  if (item.tags.some((t) => norm(t).includes(q))) return RANK.TAG_MATCH;
+
+  return RANK.NO_MATCH;
+}
+
 export default function SearchModal({ isOpen, onClose }: SearchModalProps) {
   const [query, setQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("");
@@ -36,38 +93,67 @@ export default function SearchModal({ isOpen, onClose }: SearchModalProps) {
   const inputRef = useRef<HTMLInputElement>(null);
   const resultsRef = useRef<HTMLDivElement>(null);
 
-  const allItems = [
-    ...categories.map((c) => ({
-      id: c.id,
-      title: c.name,
-      description: c.description,
-      category: c.name,
-      type: "category" as const,
-    })),
-    ...trendingResources.map((r) => ({
-      id: r.id,
-      title: r.title,
-      description: r.description,
-      category: r.category,
-      type: "resource" as const,
-      url: r.url,
-    })),
-  ];
+  // Build a stable, normalized index of everything searchable.
+  const allItems = useMemo<SearchableItem[]>(() => {
+    const fromCategories: SearchableItem[] = categories.map((c) => {
+      const { subcategory, tags } = readOptional(c);
+      return {
+        id: c.id,
+        title: c.name,
+        description: c.description,
+        category: c.name,
+        subcategory,
+        tags,
+        type: "category",
+      };
+    });
 
-  const filtered = allItems.filter((item) => {
-    const matchesQuery =
-      !query ||
-      item.title.toLowerCase().includes(query.toLowerCase()) ||
-      item.description.toLowerCase().includes(query.toLowerCase());
-    const matchesCategory =
-      !selectedCategory || item.category === selectedCategory;
-    return matchesQuery && matchesCategory;
-  });
+    const fromResources: SearchableItem[] = trendingResources.map((r) => {
+      const { subcategory, tags } = readOptional(r);
+      return {
+        id: r.id,
+        title: r.title,
+        description: r.description,
+        category: r.category,
+        subcategory,
+        tags,
+        type: "resource",
+        url: r.url,
+      };
+    });
+
+    return [...fromCategories, ...fromResources];
+  }, []);
+
+  // Filter + rank
+  const filtered = useMemo<SearchableItem[]>(() => {
+    const q = norm(query);
+    const cat = selectedCategory;
+
+    // Apply category chip filter first (exact match, existing behavior)
+    const base = cat ? allItems.filter((i) => i.category === cat) : allItems;
+
+    if (!q) return base;
+
+    // Score, keep matches, sort by rank (stable for equal scores via index)
+    const scored = base
+      .map((item, index) => ({ item, score: scoreItem(item, q), index }))
+      .filter((s) => s.score !== RANK.NO_MATCH)
+      .sort((a, b) => (a.score - b.score) || (a.index - b.index));
+
+    return scored.map((s) => s.item);
+  }, [allItems, query, selectedCategory]);
 
   const handleScrollToCategory = useCallback(
     (categoryName: string) => {
       // Find the matching category slug from the category name
-      const slug = categoryName.toLowerCase().replace(/[^a-z0-9]+/g, "-");
+      const category = categories.find(
+        c => c.name === categoryName
+      );
+
+      if (!category) return;
+
+      const slug = category.slug;
       if (window.__scrollToCategory) {
         window.__scrollToCategory(slug);
       } else {
@@ -189,11 +275,10 @@ export default function SearchModal({ isOpen, onClose }: SearchModalProps) {
             <div className="flex gap-2 px-4 sm:px-5 py-3 overflow-x-auto border-b border-white/[0.04]">
               <button
                 onClick={() => setSelectedCategory("")}
-                className={`shrink-0 px-3 py-1 rounded-full text-xs font-medium whitespace-nowrap transition-all duration-200 ${
-                  !selectedCategory
+                className={`shrink-0 px-3 py-1 rounded-full text-xs font-medium whitespace-nowrap transition-all duration-200 ${!selectedCategory
                     ? "bg-white/[0.07] text-white/90 border border-white/10"
                     : "text-white/35 border border-white/[0.04] hover:text-white/60 hover:border-white/10"
-                }`}
+                  }`}
               >
                 All
               </button>
@@ -208,11 +293,10 @@ export default function SearchModal({ isOpen, onClose }: SearchModalProps) {
                       handleScrollToCategory(cat.name);
                     }
                   }}
-                  className={`shrink-0 px-3 py-1 rounded-full text-xs font-medium whitespace-nowrap transition-all duration-200 ${
-                    selectedCategory === cat.name
+                  className={`shrink-0 px-3 py-1 rounded-full text-xs font-medium whitespace-nowrap transition-all duration-200 ${selectedCategory === cat.name
                       ? "bg-white/[0.07] text-white/90 border border-white/10"
                       : "text-white/35 border border-white/[0.04] hover:text-white/60 hover:border-white/10"
-                  }`}
+                    }`}
                 >
                   {cat.name}
                 </button>
@@ -269,11 +353,10 @@ export default function SearchModal({ isOpen, onClose }: SearchModalProps) {
                         onClose();
                       }
                     }}
-                    className={`w-full flex items-center gap-3 sm:gap-4 px-4 sm:px-5 py-3 sm:py-3.5 text-left transition-all duration-200 ${
-                      index === activeIndex
+                    className={`w-full flex items-center gap-3 sm:gap-4 px-4 sm:px-5 py-3 sm:py-3.5 text-left transition-all duration-200 ${index === activeIndex
                         ? "bg-white/[0.05]"
                         : "hover:bg-white/[0.02]"
-                    }`}
+                      }`}
                   >
                     <div
                       className="shrink-0 w-7 h-7 sm:w-8 sm:h-8 rounded-lg flex items-center justify-center text-xs font-medium tracking-wide"

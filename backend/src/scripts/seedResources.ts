@@ -184,6 +184,7 @@ const seedResources = async () => {
         featured: false,
         rating: 4,
       },
+      
 
 
 
