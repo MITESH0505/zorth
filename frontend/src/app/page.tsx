@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback, useRef } from "react";
-import CinematicNavbar from "@/components/CinematicNavbar";
+// import CinematicNavbar from "@/components/CinematicNavbar";
 import CinematicHero from "@/components/CinematicHero";
 import SearchModal from "@/components/SearchModal";
 // import Sidebar from "@/components/Sidebar";
@@ -83,7 +83,7 @@ export default function Home() {
   return (
     <>
       {/* ── Cinematic header (full-width, above sidebar layout) ── */}
-      <CinematicNavbar onSearchOpen={() => setSearchOpen(true)} />
+      {/* <CinematicNavbar onSearchOpen={() => setSearchOpen(true)} /> */}
       <CinematicHero onSearchOpen={() => setSearchOpen(true)} />
 
       {/* ── Existing discovery platform content ── */}
