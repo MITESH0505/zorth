@@ -17,7 +17,7 @@
 
 import { useState, useEffect, useRef, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Search, X, SearchX } from "lucide-react";
+import { Search, X, SearchX, Globe } from "lucide-react";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -122,6 +122,54 @@ function StarRating({ rating }: { rating: number }) {
       </div>
       <span className="text-zinc-400 text-sm">{rating}/5</span>
     </div>
+  );
+}
+
+// ─── Favicon helpers ──────────────────────────────────────────────────────────
+
+/**
+ * getFaviconUrl — derives a favicon URL directly from a resource's `url`.
+ * No hardcoded domains: the hostname is parsed at runtime via the URL API,
+ * then handed to Google's public favicon service. Returns null when the
+ * stored url can't be parsed, so callers can skip straight to the fallback.
+ */
+function getFaviconUrl(url: string): string | null {
+  try {
+    const { hostname } = new URL(url);
+    return `https://www.google.com/s2/favicons?domain=${hostname}&sz=64`;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * ResourceFavicon — small icon rendered beside a resource title.
+ * Fixed 20px box so nothing shifts while the image loads. On a missing/
+ * unparseable url or a failed image load, it swaps to a neutral placeholder
+ * instead of ever showing a broken-image icon.
+ */
+function ResourceFavicon({ url }: { url: string }) {
+  const [failed, setFailed] = useState(false);
+  const src = getFaviconUrl(url);
+
+  if (!src || failed) {
+    return (
+      <span className="w-5 h-5 shrink-0 rounded-sm bg-zinc-800 flex items-center justify-center">
+        <Globe size={12} className="text-zinc-600" />
+      </span>
+    );
+  }
+
+  return (
+    <img
+      src={src}
+      alt=""
+      width={20}
+      height={20}
+      loading="lazy"
+      onError={() => setFailed(true)}
+      className="w-5 h-5 shrink-0 object-contain rounded-sm"
+    />
   );
 }
 
@@ -292,7 +340,10 @@ export default function CategoryResourceList({
                 className="block border border-zinc-800 rounded-xl p-5 hover:border-indigo-500 transition"
               >
                 {/* Title */}
-                <h2 className="text-2xl font-semibold">{resource.title}</h2>
+                <h2 className="text-2xl font-semibold flex items-center gap-2.5">
+                  <ResourceFavicon url={resource.url} />
+                  <span>{resource.title}</span>
+                </h2>
 
                 {/* Star rating */}
                 <div className="mt-2">
