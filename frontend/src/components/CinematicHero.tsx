@@ -1,6 +1,6 @@
 "use client";
 
-import { Star, Clock, Calendar, Play} from "lucide-react";
+import { Play, Sparkles } from "lucide-react";
 import HoverBorderGradient from "@/components/ui/hover-border-gradient";
 
 const VIDEO_URL =
@@ -60,26 +60,23 @@ export default function CinematicHero({ onSearchOpen }: CinematicHeroProps) {
             {/* ── Left: Copy ── */}
             <div className="flex-1">
 
-              {/* Metadata row */}
+              {/* Badge */}
               <div
-                className="flex flex-wrap items-center gap-3 sm:gap-6 mb-6 md:mb-8 text-white animate-blur-fade-up"
-                style={{ animationDelay: "300ms", fontSize: "0.75rem" }}
+                className="inline-flex items-center gap-1.5 mb-4 md:mb-5 px-3.5 py-1.5 rounded-full animate-blur-fade-up"
+                style={{
+                  background: "rgba(255,255,255,0.08)",
+                  border: "1px solid rgba(255,255,255,0.14)",
+                  backdropFilter: "blur(12px)",
+                  WebkitBackdropFilter: "blur(12px)",
+                  animationDelay: "200ms",
+                }}
               >
-                <span className="flex items-center gap-1.5 font-medium">
-                  <Star
-                    size={16}
-                    className="fill-white sm:w-5 sm:h-5"
-                    style={{ flexShrink: 0 }}
-                  />
-                  <span className="text-xs sm:text-sm">400+ Resources</span>
-                </span>
-                <span className="flex items-center gap-1.5 text-white/70">
-                  <Clock size={16} style={{ flexShrink: 0 }} />
-                  <span className="text-xs sm:text-sm">12 Categories</span>
-                </span>
-                <span className="flex items-center gap-1.5 text-white/70">
-                  <Calendar size={16} style={{ flexShrink: 0 }} />
-                  <span className="text-xs sm:text-sm">Always Free</span>
+                <Sparkles size={13} className="text-white/70" style={{ flexShrink: 0 }} />
+                <span
+                  className="text-white/80 font-medium"
+                  style={{ fontSize: "0.75rem", letterSpacing: "0.01em" }}
+                >
+                  Curated · Verified
                 </span>
               </div>
 
@@ -104,8 +101,7 @@ export default function CinematicHero({ onSearchOpen }: CinematicHeroProps) {
                   animationDelay: "500ms",
                 }}
               >
-                A premium discovery platform for streaming, AI tools, software,
-                knowledge, and digital culture — curated, not algorithmic.
+                Hand-picked websites for streaming, AI, software, learning and the open web — curated so you spend less time searching and more time discovering.
               </p>
 
               {/* CTA buttons */}
