@@ -28,6 +28,7 @@ interface Resource {
   url: string;
   rating: number;
   tags: string[];
+  subcategory?: string;
   category: {
     slug: string;
     name?: string;
@@ -110,6 +111,27 @@ function matchesQuery(resource: Resource, query: string): boolean {
   return false;
 }
 
+// ─── Subcategory tabs (Reading category only) ─────────────────────────────────
+
+/**
+ * READING_SUBCATEGORIES — fixed tab list for the Reading category.
+ * "All" is always first and always shows every resource, including ones
+ * that have no `subcategory` value at all.
+ */
+const READING_SUBCATEGORIES = ["All", "Manga", "Books", "Comics"] as const;
+type SubcategoryTab = (typeof READING_SUBCATEGORIES)[number];
+
+/**
+ * matchesSubcategory — pure function, no side effects.
+ * "All" always matches. Otherwise the resource's `subcategory` must match
+ * the active tab exactly. Resources with no `subcategory` therefore only
+ * ever appear under "All".
+ */
+function matchesSubcategory(resource: Resource, tab: SubcategoryTab): boolean {
+  if (tab === "All") return true;
+  return resource.subcategory === tab;
+}
+
 // ─── StarRating helper ────────────────────────────────────────────────────────
 
 function StarRating({ rating }: { rating: number }) {
@@ -187,10 +209,20 @@ export default function CategoryResourceList({
   // Debounced query — filter computation waits 250ms after the user stops typing.
   const query = useDebounce(rawQuery, 250);
 
+  // Subcategory tabs only apply to the Reading category. Every other
+  // category renders exactly as before — no tabs, no extra filtering.
+  const isReadingCategory = slug.toLowerCase() === "reading";
+  const [activeSubcategory, setActiveSubcategory] =
+    useState<SubcategoryTab>("All");
+
   // Derive the filtered list. useMemo-equivalent: recomputes only when
-  // resources or the debounced query changes. For hundreds of items this
-  // is negligibly cheap; no need for useMemo here.
-  const filtered = resources.filter((r) => matchesQuery(r, query));
+  // resources, the debounced query, or the active subcategory changes.
+  // For hundreds of items this is negligibly cheap; no need for useMemo here.
+  const filtered = resources.filter(
+    (r) =>
+      matchesQuery(r, query) &&
+      (!isReadingCategory || matchesSubcategory(r, activeSubcategory))
+  );
 
   // Clear search with Escape key when input is focused.
   const handleKeyDown = useCallback(
@@ -205,6 +237,33 @@ export default function CategoryResourceList({
 
   return (
     <div>
+      {/* ── Subcategory tabs — Reading category only ───────────────────── */}
+      {isReadingCategory && (
+        <div className="mb-6 flex flex-wrap gap-2">
+          {READING_SUBCATEGORIES.map((tab) => {
+            const isActive = activeSubcategory === tab;
+            return (
+              <button
+                key={tab}
+                onClick={() => setActiveSubcategory(tab)}
+                className={`
+                  px-4 py-1.5 rounded-full text-sm font-medium tracking-tight
+                  border transition-colors duration-200
+                  ${
+                    isActive
+                      ? "bg-indigo-500/15 text-indigo-400 border-indigo-500/40"
+                      : "bg-zinc-900/60 text-zinc-400 border-zinc-800 hover:text-zinc-100 hover:border-zinc-600"
+                  }
+                `}
+                aria-pressed={isActive}
+              >
+                {tab}
+              </button>
+            );
+          })}
+        </div>
+      )}
+
       {/* ── Search bar ─────────────────────────────────────────────────── */}
       <div className="mb-8">
         {/*
