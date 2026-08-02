@@ -1,19 +1,6 @@
 "use client";
 
-/**
- * CategoryResourceList.tsx
- *
- * A fully client-side component that receives the pre-filtered resources
- * (already scoped to the current category slug by the server) and provides:
- *   - A premium debounced search bar (250ms)
- *   - Real-time filtering across title, description, and tags (case-insensitive, partial)
- *   - Framer Motion stagger animations on the results list
- *   - A polished "No results" empty state
- *   - Preserves the existing dark/premium card design 100%
- *
- * NO backend calls, NO new API routes, NO schema changes.
- * Search runs entirely on the already-fetched resources array.
- */
+
 
 import { useState, useEffect, useRef, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -383,7 +370,7 @@ export default function CategoryResourceList({
             variants={listVariants}
             initial="hidden"
             animate="visible"
-            className="space-y-4"
+            className="space-y-3"
           >
             {filtered.map((resource) => (
               <motion.a
@@ -393,33 +380,33 @@ export default function CategoryResourceList({
                 target="_blank"
                 rel="noopener noreferrer"
                 /*
-                 * Reusing the EXACT same Tailwind classes from the original
-                 * page.tsx card — no design drift.
+                 * Same base look as before (border/rounded/bg), with a
+                 * tighter padding and a subtle hover tint + glow layered on.
                  */
-                className="block border border-zinc-800 rounded-xl p-5 hover:border-indigo-500 transition"
+                className="block border border-zinc-800 rounded-xl p-4 hover:border-indigo-500 hover:bg-white/[0.02] hover:shadow-[0_4px_20px_-4px_rgba(99,102,241,0.15)] transition-all duration-300"
               >
-                {/* Title */}
-                <h2 className="text-2xl font-semibold flex items-center gap-2.5">
-                  <ResourceFavicon url={resource.url} />
-                  <span>{resource.title}</span>
-                </h2>
-
-                {/* Star rating */}
-                <div className="mt-2">
-                  <StarRating rating={resource.rating} />
+                {/* Header: icon + title + rating, on one row */}
+                <div className="flex items-start justify-between gap-3">
+                  <h2 className="flex-1 min-w-0 text-2xl font-bold tracking-tight flex items-center gap-2.5">
+                    <ResourceFavicon url={resource.url} />
+                    <span>{resource.title}</span>
+                  </h2>
+                  <div className="shrink-0 pt-1">
+                    <StarRating rating={resource.rating} />
+                  </div>
                 </div>
 
                 {/* Description */}
-                <p className="text-zinc-400 mt-2">{resource.description}</p>
+                <p className="text-zinc-400 text-sm leading-relaxed mt-3">{resource.description}</p>
 
-                {/* Tags — same styling as original */}
-                <div className="flex gap-2 mt-3 flex-wrap">
+                {/* Tags */}
+                <div className="flex flex-wrap gap-1.5 mt-3.5">
                   {resource.tags.map((tag) => (
                     <span
                       key={tag}
                       className="
-                        px-3 py-1 rounded-full bg-zinc-800/80 text-zinc-400
-                        text-sm font-medium tracking-tight border border-zinc-700/50
+                        px-2.5 py-1 rounded-full bg-zinc-800/80 text-zinc-400
+                        text-xs font-medium tracking-wide border border-zinc-700/50
                         transition-colors duration-200
                         hover:bg-zinc-700/70 hover:text-zinc-100 hover:border-zinc-500
                         font-sans
