@@ -380,16 +380,20 @@ export default function CategoryResourceList({
                 target="_blank"
                 rel="noopener noreferrer"
                 /*
-                 * Same base look as before (border/rounded/bg), with a
-                 * tighter padding and a subtle hover tint + glow layered on.
+                 * Netflix-inspired polish: soft border by default, brightening
+                 * slightly on hover (no color shift), a faint dark gradient
+                 * for depth, and a gentle lift + scale + shadow on hover —
+                 * same footprint, no layout change.
                  */
-                className="block border border-zinc-800 rounded-xl p-4 hover:border-indigo-500 hover:bg-white/[0.02] hover:shadow-[0_4px_20px_-4px_rgba(99,102,241,0.15)] transition-all duration-300"
+                className="block border border-zinc-800/80 rounded-xl p-4 bg-gradient-to-b from-white/[0.015] to-black/[0.15] hover:border-zinc-600 hover:-translate-y-0.5 hover:scale-[1.01] hover:shadow-[0_8px_28px_-8px_rgba(0,0,0,0.55)] transition-all duration-300 ease-out"
               >
                 {/* Header: icon + title + rating, on one row */}
                 <div className="flex items-start justify-between gap-3">
                   <h2 className="flex-1 min-w-0 text-2xl font-bold tracking-tight flex items-center gap-2.5">
-                    <ResourceFavicon url={resource.url} />
-                    <span>{resource.title}</span>
+                    <span className="shrink-0 flex items-center justify-center">
+                      <ResourceFavicon url={resource.url} />
+                    </span>
+                    <span className="truncate">{resource.title}</span>
                   </h2>
                   <div className="shrink-0 pt-1">
                     <StarRating rating={resource.rating} />
@@ -397,16 +401,16 @@ export default function CategoryResourceList({
                 </div>
 
                 {/* Description */}
-                <p className="text-zinc-400 text-sm leading-relaxed mt-3">{resource.description}</p>
+                <p className="text-zinc-400 text-sm leading-relaxed mt-2.5 line-clamp-2">{resource.description}</p>
 
                 {/* Tags */}
-                <div className="flex flex-wrap gap-1.5 mt-3.5">
+                <div className="flex flex-wrap gap-1 mt-3">
                   {resource.tags.map((tag) => (
                     <span
                       key={tag}
                       className="
-                        px-2.5 py-1 rounded-full bg-zinc-800/80 text-zinc-400
-                        text-xs font-medium tracking-wide border border-zinc-700/50
+                        px-2 py-0.5 rounded-full bg-zinc-800/80 text-zinc-400
+                        text-[11px] font-medium tracking-wide border border-zinc-700/50
                         transition-colors duration-200
                         hover:bg-zinc-700/70 hover:text-zinc-100 hover:border-zinc-500
                         font-sans
