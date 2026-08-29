@@ -6,7 +6,7 @@ import CinematicHero from "@/components/CinematicHero";
 import SearchModal from "@/components/SearchModal";
 // import Sidebar from "@/components/Sidebar";
 import CategoryGrid from "@/components/CategoryGrid";
-import TrendingSection from "@/components/TrendingSection";
+// import TrendingSection from "@/components/TrendingSection";`
 import AboutSection from "@/components/AboutSection";
 // import CommunitySection from "@/components/CommunitySection";
 import Footer from "@/components/Footer";
@@ -101,7 +101,7 @@ export default function Home() {
             <CategoryGrid activeCategory={activeCategory} />
           </div>
 
-          <TrendingSection />
+          {/* <TrendingSection /> */}
           <AboutSection />
           {/* <CommunitySection /> */}
           <Footer />
