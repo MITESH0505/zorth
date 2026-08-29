@@ -65,16 +65,20 @@ export default function CategoryGrid({ activeCategory = "" }: CategoryGridProps)
 
         {/* Grid — adaptive on ultra-wide to prevent overstretched cards */}
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-[repeat(auto-fit,minmax(250px,1fr))] gap-4 sm:gap-5 lg:gap-6 2xl:gap-8">
-          {categories.map((cat, i) => (
-            <CategoryCard
-              key={cat.id}
-              category={cat}
-              count={CATEGORY_COUNTS[cat.name] || 0}
-              index={i}
-              isActive={activeCategory === cat.slug}
-              isHighlighted={highlightedSlug === cat.slug}
-            />
-          ))}
+          {categories
+            .filter((cat) =>
+              ["anime", "movies", "reading", "ai"].includes(cat.slug)
+            )
+            .map((cat, i) => (
+              <CategoryCard
+                key={cat.id}
+                category={cat}
+                count={CATEGORY_COUNTS[cat.name] || 0}
+                index={i}
+                isActive={activeCategory === cat.slug}
+                isHighlighted={highlightedSlug === cat.slug}
+              />
+            ))}
         </div>
       </div>
     </section>
